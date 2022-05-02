@@ -2,9 +2,11 @@
 
 <PageTitle>Weather forecast</PageTitle>
 
+@*
 @using BlazorApp1.Data
 @inject WeatherForecastService ForecastService
-
+*@
+@inject swaggerClient swaggerClient
 <h1>Weather forecast</h1>
 
 <p>This component demonstrates fetching data from a service.</p>
@@ -28,7 +30,7 @@ else
             @foreach (var forecast in forecasts)
             {
                 <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
+                    <td>@forecast.Date.DateTime.ToShortDateString()</td>
                     <td>@forecast.TemperatureC</td>
                     <td>@forecast.TemperatureF</td>
                     <td>@forecast.Summary</td>
@@ -39,10 +41,10 @@ else
 }
 
 @code {
-    private WeatherForecast[]? forecasts;
+    private IEnumerable<WeatherForecast>? forecasts;
 
     protected override async Task OnInitializedAsync()
     {
-        forecasts = await ForecastService.GetForecastAsync(DateTime.Now);
+        forecasts = await swaggerClient.GetWeatherForecastAsync();
     }
 }
