@@ -5,8 +5,17 @@
 #    https://aka.ms/AA7q20u
 #
 name: samples
+registry: marck7jr
 services:
 - name: blazorapp1
   project: src/BlazorApp1/BlazorApp1.csproj
 - name: webapplication1
   project: src/WebApplication1/WebApplication1.csproj
+- name: redis
+  image: redis
+  bindings:
+  - port: 6379
+    connectionString: "${host}:${port}"
+- name: redis-cli
+  image: redis
+  args: "redis-cli -h redis MONITOR"
