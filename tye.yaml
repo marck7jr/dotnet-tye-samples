@@ -9,6 +9,8 @@ registry: marck7jr
 services:
 - name: blazorapp1
   project: src/BlazorApp1/BlazorApp1.csproj
+- name: grpcservice1
+  project: src/GrpcService1/GrpcService1.csproj
 - name: webapplication1
   project: src/WebApplication1/WebApplication1.csproj
 - name: redis

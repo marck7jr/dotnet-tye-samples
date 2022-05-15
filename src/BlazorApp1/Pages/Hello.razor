@@ -1,0 +1,20 @@
+﻿@page "/hello"
+
+@inject swaggerClient swaggerClient
+
+<h3>Hello</h3>
+
+<InputText name="name" label="Name" @bind-Value="Name" />
+<button @onclick="OnSubmitButtonClick">Submit</button>
+
+<h3>@Reply?.Message</h3>
+
+@code {
+    public string? Name { get; set; }
+    public HelloReply? Reply { get; set; }
+
+    public async Task OnSubmitButtonClick(MouseEventArgs args)
+    {
+        Reply = await swaggerClient.GetGreetingAsync(Name);
+    }
+}

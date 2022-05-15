@@ -1,3 +1,5 @@
+using Grpc.Net.Client;
+using GrpcService1;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text.Json;
 
@@ -10,6 +12,13 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = builder.Configuration.GetConnectionString("redis");
+});
+builder.Services.AddScoped<Greeter.GreeterClient>(x =>
+{
+    var address = builder.Configuration.GetServiceUri("grpcservice1")?.AbsoluteUri ?? throw new NullReferenceException("GrpcService1 not found");
+    var channel = GrpcChannel.ForAddress(address);
+
+    return new(channel);
 });
 
 var app = builder.Build();
@@ -30,11 +39,12 @@ var summaries = new[]
 
 app.MapGet("/weatherforecast", async (IDistributedCache cache) =>
 {
-    var weather = await cache.GetStringAsync("weather");
+    var forecasts = Array.Empty<WeatherForecast>();
+    var cachedValue = await cache.GetStringAsync("weather");
 
-    if (weather is null)
+    if (cachedValue is null)
     {
-        var forecast = Enumerable.Range(1, 5).Select(index =>
+        forecasts = Enumerable.Range(1, 5).Select(index =>
             new WeatherForecast
             (
                 DateTime.Now.AddDays(index),
@@ -43,17 +53,26 @@ app.MapGet("/weatherforecast", async (IDistributedCache cache) =>
             ))
             .ToArray();
 
-        weather = JsonSerializer.Serialize(forecast);
+        cachedValue = JsonSerializer.Serialize(forecasts);
 
-        await cache.SetStringAsync("weather", weather, new DistributedCacheEntryOptions()
+        await cache.SetStringAsync("weather", cachedValue, new DistributedCacheEntryOptions()
         {
             AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(5)
         });
     }
 
-    return weather;
+    return forecasts;
 })
+.Produces<IEnumerable<WeatherForecast>>()
 .WithName("GetWeatherForecast");
+
+app.MapGet("/sayhello", async (IDistributedCache cache, Greeter.GreeterClient greeterClient, string name) =>
+{
+    var reply = await greeterClient.SayHelloAsync(new() { Name = name }, null);
+    return reply;
+})
+.Produces<HelloReply>()
+.WithName("GetGreeting");
 
 app.Run();
 

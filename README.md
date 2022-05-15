@@ -15,6 +15,7 @@ The features of this repository are:
 - [x] Basic Project Tye configuration.
 - [x] Basic microservice development using .NET.
 - [x] Redis cache support.
+- [x] GRPC support.
 - [ ] Message broker support.
 - [ ] Database support.
 - [ ] Authentication support.
